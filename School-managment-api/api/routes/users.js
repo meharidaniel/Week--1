@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Users = require('../models/users'); 
-const mongoose = require('mongoose');
+const Users = require('../models/users');
+const auth = require('../middlewares/authorization'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const config = require('config');
+
 
 router.post('/signup', (req, res, next) => {
     Users.find({email: req.body.email}).exec().then( User => {
@@ -42,7 +44,7 @@ router.post('/signup', (req, res, next) => {
     }) 
 });
 
-router.post('/signin', (req, res, next) => {
+router.post('/signin',(req, res, next) => {
     User
     .find({email: req.body.email})
     .exec()
@@ -63,7 +65,7 @@ router.post('/signin', (req, res, next) => {
                     email: user[0].email, 
                     userId: user[0]._id
                 }, 
-                process.env.JWT_KEY,
+                config.get('privateKey'),
                 {
                     expiresIn: "1h"
                 }

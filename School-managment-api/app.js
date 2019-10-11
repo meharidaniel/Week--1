@@ -1,3 +1,8 @@
+const studentRoutes = require('./api/routes/students');
+const staffRoutes = require('./api/routes/staffs');
+const userRoutes = require('./api/routes/users');
+const error = require('./api/middlewares/errorHandler');
+const unreachedRoute = require('./api/middlewares/unreachedRoute');
 const express = require('express');
 const app = express();
 const morgan= require('morgan');
@@ -8,9 +13,7 @@ mongoose.connect('mongodb://localhost/School-mang-sys',{useNewUrlParser:true,use
 .then(() => console.log('Connected to mongodb...'))
 .catch( (error) => console.error(`cant connect bcz of ${error.message}`));
 
-const studentRoutes = require('./api/routes/students');
-const staffRoutes = require('./api/routes/staffs');
-const userRoutes = require('./api/routes/users');
+
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
@@ -32,21 +35,9 @@ app.use((req, res, next) => {
 app.use('/students', studentRoutes);
 app.use('/staffs', staffRoutes);
 app.use('/users', userRoutes);
+app.use(unreachedRoute);
 
-app.use((req, res, next) => {
-    const error = new Error('Not Found');
-    error.status = 404;
-    next(error);
-});
-
-app.use((error, req, res, next) => {
-    res.status(error.satus || 500);
-    res.json({
-        error: {
-            message: error.message
-        }
-    });
-})
+app.use(error);
 
 
 module.exports = app;
